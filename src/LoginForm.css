@@ -46,8 +46,8 @@ a {
 
 button {
 	border-radius: 20px;
-	border: 1px solid #FF4B2B;
-	background-color: #FF4B2B;
+	border: 1px solid #3286FF;
+	background-color: #3286FF;
 	color: #FFFFFF;
 	font-size: 12px;
 	font-weight: bold;
@@ -64,10 +64,22 @@ button:active {
 button:focus {
 	outline: none;
 }
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #fff;
+  color: #666666;
+}
 
 button.ghost {
 	background-color: transparent;
 	border-color: #FFFFFF;
+}
+
+.errorMsgs {
+	color: red;
+	font-size: small;
+	text-align: left;
 }
 
 form {
@@ -98,7 +110,7 @@ input {
 	overflow: hidden;
 	width: 768px;
 	max-width: 100%;
-	min-height: 480px;
+	min-height: 800px;
 }
 
 .form-container {
@@ -160,9 +172,9 @@ input {
 }
 
 .overlay {
-	background: #FF416C;
-	background: -webkit-linear-gradient(to right, #FF4B2B, #FF416C);
-	background: linear-gradient(to right, #FF4B2B, #FF416C);
+	background: rgb(50, 134, 255);
+	background: -webkit-linear-gradient(to right, #3286FF, #3286FF);
+	background: linear-gradient(to right, #3286FF, #3286FF);
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: 0 0;

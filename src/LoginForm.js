@@ -1,5 +1,12 @@
 import React from 'react'
-import './LoginForm.css'
+import './LoginForm.css';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebook, faGooglePlusG, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons";
+
+const ValidEmailRegex = RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+const ValidZipCodeRegex = RegExp(/^[0-9]{5,6}$/);
+const ValidPasswordRegex = RegExp(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,20}$/)
 
 class LoginForm extends React.Component {
     constructor(props) {
@@ -8,6 +15,26 @@ class LoginForm extends React.Component {
             maskStyle: {
                 left: 512,
                 right: 0
+            },
+            showPassword: true,
+            showSignupPassword: true,
+            showSignupConfirmPassword: true,
+            loginEmail: '',
+            loginPassword: '',
+            signupEmail: '',
+            organizationName: '',
+            signupPassword: '',
+            signupConfirmPassword: '',
+            addressLine: '',
+            country: '',
+            state: '',
+            city: '',
+            postalCode: '',
+            errors: {
+                signupConfirmPasswordErrorMsg: '',
+                signupPasswordErrorMsg: '',
+                signupEmailErrorMsg: '',
+                signupPostalCodeErrorMsg: ''
             }
         }
 
@@ -18,22 +45,7 @@ class LoginForm extends React.Component {
         this.onSignUp = this.onSignUp.bind(this)
 
     }
-    componentDidMount() {
-        // mask was in the left
-        // clip-path: inset(0px 512px 0 0);
 
-        // mask was in the right
-        // clip-path: inset(0px 0 0 512px);
-
-
-
-        // this.interval = setInterval(() => {
-        //     let numLeft = this.state.maskStyle.left + 1
-        //     let numRight = this.state.maskStyle.right -1
-
-        //     this.setState({ maskStyle: { left: numLeft, right: numRight } })
-        // }, 1000000000);
-    }
     componentWillUnmount() {
         clearInterval(this.interval);
 
@@ -43,61 +55,56 @@ class LoginForm extends React.Component {
         this.container.current.classList.add("right-panel-active");
     }
     onSignIn() {
-        debugger
         this.container.current.classList.remove("right-panel-active");
     }
 
-    // MoveRight() {
-    //     clearInterval(this.interval);
+    showPassword = () => {
+        this.state.showPassword === false ? this.setState({ showPassword: true }) : this.setState({ showPassword: false });
+    }
 
-    //     let numLeft = 512
-    //     let numRight = 0
-    //     this.interval = setInterval(() => {
-    //         if (numLeft <= 0) {
-    //             clearInterval(this.interval);
-    //             return
-    //         }
+    showSignupPassword = () => {
+        this.state.showSignupPassword === false ? this.setState({ showSignupPassword: true }) : this.setState({ showSignupPassword: false });
+    }
 
-    //         let seedLeft = 10;
-    //         let seedRight = 10;
-    //         if (numLeft > 400) {
-    //             seedLeft = 10
-    //             seedRight = 5
-    //         } else {
-    //             seedLeft = 5
-    //             seedRight = 10
-    //         }
+    showSignupConfirmPassword = () => {
+        this.state.showSignupConfirmPassword === false ? this.setState({ showSignupConfirmPassword: true }) : this.setState({ showSignupConfirmPassword: false });
+    }
 
-
-    //         numLeft = numLeft - seedLeft
-    //         numRight = numRight + seedRight
-
-
-    //         this.setState({ maskStyle: { left: numLeft, right: numRight } })
-    //     }, 20);
-    // }
-    // MoveLeft() {
-    //     clearInterval(this.interval);
-
-    //     let numLeft = 0
-    //     let numRight = 512
-    //     this.interval = setInterval(() => {
-
-    //         if (numRight <= 0) {
-    //             clearInterval(this.interval);
-    //             return
-    //         }
-
-    //         numLeft = numLeft + 10
-    //         numRight = numRight - 10
-
-    //         this.setState({ maskStyle: { left: numLeft, right: numRight } })
-    //     }, 20);
-    // }
+    handleChange = (event) => {
+        event.preventDefault();
+        const { id, value } = event.target;
+        let errors = this.state.errors;
+        switch (id) {
+            case 'signupEmail':
+                errors.signupEmailErrorMsg =
+                    ValidEmailRegex.test(value)
+                        ? ''
+                        : 'Invalid Email';
+                break;
+            case 'signupPassword':
+                errors.signupPasswordErrorMsg =
+                    ValidPasswordRegex.test(value)
+                        ? ''
+                        : 'Password Should Contain atleast one uppercase letter, one lowercase letter, one digit and one special character and must be 8 to 20 characters';
+                break;
+            case 'signupConfirmPassword':
+                errors.signupConfirmPasswordErrorMsg = this.state.signupPassword === value ? '' : 'Password and Confirm Password Should Match.'
+                break;
+            case 'postalCode':
+                errors.signupPostalCodeErrorMsg = ValidZipCodeRegex.test(value) ? '' : 'Invalid Postal Code'
+                break;
+            default:
+                break;
+        }
+        this.setState({ [id]: value });
+    }
 
     render() {
-        const clipValue = `inset(0 ${this.state.maskStyle.left}px 0 ${this.state.maskStyle.right}px)`
-        // const clipValue =  `inset(0 200px 0 200px)`
+
+        const { loginEmail, loginPassword, signupEmail, signupConfirmPassword, signupPassword, organizationName, country, city, state, addressLine, postalCode } = this.state;
+        const isLoginEnabled = !loginEmail || !loginPassword
+        const isSignupEnabled = !signupEmail || !signupPassword || !signupConfirmPassword || !organizationName || !country || !city || !state || !addressLine || !postalCode
+        console.log(isSignupEnabled || this.state.postalCode.length >= 5);
 
         return (
             <div className="container" id="container" ref={this.container}>
@@ -105,36 +112,59 @@ class LoginForm extends React.Component {
                     <form action="#">
                         <h1>Create Account</h1>
                         <div className="social-container">
-                            <a href="#" className="social">
-                                <i className="fab fa-facebook-f"></i>
+                            <a href="/#" className="social">
+                                <FontAwesomeIcon icon={faFacebook} />
                             </a>
-                            <a href="#" className="social">
-                                <i className="fab fa-google-plus-g"></i>
+                            <a href="/#" className="social">
+                                <FontAwesomeIcon icon={faGooglePlusG} />
                             </a>
-                            <a href="#" className="social">
-                                <i className="fab fa-linkedin-in"></i>
+                            <a href="/#" className="social">
+                                <FontAwesomeIcon icon={faLinkedinIn} />
                             </a>
                         </div>
                         <span>or use your email for registration</span>
-                        <input type="text" placeholder="Name" />
-                        <input type="email" placeholder="Email" />
-                        <input type="password" placeholder="Password" />
-                        <button onClick={this.onSignUp}>Sign Up</button>
+                        <input onChange={this.handleChange} id="signupEmail" type="email" placeholder="Email" />
+                        <div style={{ textAlign: 'left', width: '100%', marginBottom: '0.5rem' }}>
+                            <label className="errorMsgs">{this.state.errors.signupEmailErrorMsg}</label>
+                        </div>
+                        <input onChange={this.handleChange} id="organizationName" type="text" placeholder="Organization Name" />
+                        <div style={{ display: 'flex', width: '100%' }}>
+                            <input onChange={this.handleChange} id="signupPassword" type={this.state.showSignupPassword ? 'password' : 'text'} placeholder="Password" />
+                            <FontAwesomeIcon style={{ marginTop: '1.25rem', marginLeft: '-1.75rem', cursor: 'pointer' }} onClick={this.showSignupPassword} icon={this.state.showSignupPassword ? faEyeSlash : faEye} />
+                        </div>
+                        <label className="errorMsgs">{this.state.errors.signupPasswordErrorMsg}</label>
+                        <div style={{ display: 'flex', width: '100%' }}>
+                            <input onChange={this.handleChange} id="signupConfirmPassword" type={this.state.showSignupConfirmPassword ? 'password' : 'text'} placeholder="Confirm Password" />
+                            <FontAwesomeIcon style={{ marginTop: '1.25rem', marginLeft: '-1.75rem', cursor: 'pointer' }} onClick={this.showSignupConfirmPassword} icon={this.state.showSignupConfirmPassword ? faEyeSlash : faEye} />
+                        </div>
+                        <label className="errorMsgs">{this.state.errors.signupConfirmPasswordErrorMsg}</label>
+                        <input type="text" onChange={this.handleChange} id="addressLine" placeholder="Address Line" />
+                        <input type="text" onChange={this.handleChange} id="country" placeholder="Country" />
+                        <input type="text" onChange={this.handleChange} id="state" placeholder="State" />
+                        <input type="text" onChange={this.handleChange} id="city" placeholder="City" />
+                        <input type="text" onChange={this.handleChange} id="postalCode" placeholder="Postal Code" />
+                        <div style={{ textAlign: 'left', width: '100%', marginBottom: '0.5rem' }}>
+                            <label className="errorMsgs">{this.state.errors.signupPostalCodeErrorMsg}</label>
+                        </div>
+                        <button disabled={isSignupEnabled} style={{ cursor: 'pointer' }} onClick={this.onSignUp}>Sign Up</button>
                     </form>
                 </div>
                 <div className="form-container sign-in-container">
                     <form action="#">
                         <h1>Sign in</h1>
                         <div className="social-container">
-                            <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
-                            <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-                            <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
+                            <a href="/#" className="social"><FontAwesomeIcon icon={faFacebook} /></a>
+                            <a href="/#" className="social"><FontAwesomeIcon icon={faGooglePlusG} /></a>
+                            <a href="/#" className="social"><FontAwesomeIcon icon={faLinkedinIn} /></a>
                         </div>
                         <span>or use your account</span>
-                        <input type="email" placeholder="Email" />
-                        <input type="password" placeholder="Password" />
-                        <a href="#">Forgot your password?</a>
-                        <button onClick={this.onSignIn}>Sign In</button>
+                        <input id="loginEmail" type="email" placeholder="Email" onChange={this.handleChange} />
+                        <div style={{ display: 'flex', width: '100%' }}>
+                            <input onChange={this.handleChange} id="loginPassword" type={this.state.showPassword ? 'password' : 'text'} placeholder="Password" />
+                            <FontAwesomeIcon style={{ marginTop: '1.25rem', marginLeft: '-1.75rem', cursor: 'pointer' }} onClick={this.showPassword} icon={this.state.showPassword ? faEyeSlash : faEye} />
+                        </div>
+                        <a href="/#">Forgot your password?</a>
+                        <button disabled={isLoginEnabled} style={{ cursor: 'pointer' }} onClick={this.onSignIn}>Log In</button>
                     </form>
                 </div>
                 <div className="overlay-container">
@@ -142,12 +172,12 @@ class LoginForm extends React.Component {
                         <div className="overlay-panel overlay-left">
                             <h1>Welcome Back!</h1>
                             <p>To keep connected with us please login with your personal info</p>
-                            <button className="ghost" id="signIn" onClick={this.onSignIn}>Sign In</button>
+                            <button style={{ cursor: 'pointer' }} className="ghost" id="signIn" onClick={this.onSignIn}>Log In</button>
                         </div>
                         <div className="overlay-panel overlay-right">
                             <h1>Hello, Friend!</h1>
-                            <p>Enter your personal details and start journey with us</p>
-                            <button className="ghost" id="signUp" onClick={this.onSignUp}>Sign Up</button>
+                            <p>If you don't have account, Enter your personal details and start journey with us</p>
+                            <button style={{ cursor: 'pointer' }} className="ghost" id="signUp" onClick={this.onSignUp}>Sign Up</button>
                         </div>
                     </div>
                 </div>
